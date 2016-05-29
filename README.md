@@ -91,10 +91,112 @@ android 52-53 lesson
           // ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,citys);
           //方式二：用API推荐的静态方法创建.用CharSequence接口定义泛型，String就是继承类CharSequence接口
           ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,R.array.citys,android.R.layout.simple_spinner_item);
-          //--设置适配器一个下拉的布局资源，用到安卓内部的布局资源
+          //--设置适配器一个下拉样式的布局资源，用到安卓内部的布局资源
           adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);  
           //--将适配器与Spinner链接起来，完成
           spinner.setAdapter(adapter);
+      }
+  }
+
+android 54-55 lesson
+1.在ArrayAdapter.createFromResource中android的系统布局：在C:\Users\mackerlee\AppData\Local\Android\sdk\platforms\android-23\da               ta\res中就是该SDK下android的原生自带系统资源,适配器中用到的布局就在该目录的layout下.如果想用自己设计的下拉列表样               式，则按照其格式自己创造一个xml的TextView配置文件，id必须和simple_spinner_dropdown_item.xml一样都是：
+              android:id="@android:id/text1"，然后用adapter.setDropDownViewResource设置连接自定义的下拉样式即可.
+2.Spinner下拉列表样式自定义实例：在res->layout中创建自定义布局spinner_dropdown_item.xml:
+            <?xml version="1.0" encoding="utf-8"?>
+            <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@android:id/text1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_parent"
+                android:textColor="#00ff00"
+                android:textSize="20sp"/>
+  在MainActivity.java中使用自定义样式与适配器连接：
+  package com.example.mackerlee.android_52;
+
+  import android.support.v7.app.AppCompatActivity;
+  import android.os.Bundle;
+  import android.widget.ArrayAdapter;
+  import android.widget.Spinner;
+
+  public class MainActivity extends AppCompatActivity {
+  
+      private Spinner spinner;
+      @Override
+      protected void onCreate(Bundle savedInstanceState) {
+          super.onCreate(savedInstanceState);
+          setContentView(R.layout.activity_main);
+          spinner = (Spinner)findViewById(R.id.spinner02);
+  
+          //--通过代码获取strings.xml资源文件中的string数组citys
+          String[] citys = getResources().getStringArray(R.array.citys);
+          //--数组适配器:将适配器与数组链接起来
+          //方式一：用new的方式创建，用new的方法可以使获取数组不只局限于xml文件，还可以从数据库/网络等方式获取
+          // ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,citys);
+          //--方式二：用API推荐的静态方法创建.用CharSequence接口定义泛型，String就是继承类CharSequence接口
+          //--参数(上下文,数据,布局:android系统内部的布局)
+          ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,R.array.citys,android.R.layout.simple_spinner_item);
+          //--如果不设置dropdown下拉样式，则下拉列表默认任是上面的android.R.layout.simple_spinner_item布局 
+          //--使用自定义下拉列表样式spinner_dropdown_item.xml
+          adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+          //--将适配器与Spinner链接起来
+          spinner.setAdapter(adapter);
+      }
+  }
+
+3.spinner组件下拉选择响应事件：在app->java->包名->MainActivity.java中实现响应接口
+  package com.example.mackerlee.android_52;
+
+  import android.support.v7.app.AppCompatActivity;
+  import android.os.Bundle;
+  import android.view.View;
+  import android.widget.AdapterView;
+  import android.widget.ArrayAdapter;
+  import android.widget.Spinner;
+  import android.widget.Toast;
+  
+  //--implements AdapterView.OnItemSelectedListener:实现spinner组件的响应接口
+  public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener{
+  
+      private Spinner spinner;
+      @Override
+      protected void onCreate(Bundle savedInstanceState) {
+          super.onCreate(savedInstanceState);
+          setContentView(R.layout.activity_main);
+          spinner = (Spinner)findViewById(R.id.spinner02);
+  
+          //--通过代码获取strings.xml资源文件中的string数组citys
+          String[] citys = getResources().getStringArray(R.array.citys);
+          //--数组适配器:将适配器与数组链接起来
+          //方式一：用new的方式创建
+          // ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,citys);
+          //--方式二：用API推荐的静态方法创建.用CharSequence接口定义泛型，String就是继承类CharSequence接口
+          //--参数(上下文,数据,布局:android系统内部的布局)
+          ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,R.array.citys,android.R.layout.simple_spinner_item);
+          //--如果不设置dropdown下拉样式，则下拉列表默认任是上面的android.R.layout.simple_spinner_item布局
+          //adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);  //设置适配器一个下拉的布局资源，用到安卓内部的布局资源
+          //--使用自定义下拉列表样式spinner_dropdown_item.xml
+          adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+          //--将适配器与Spinner链接起来
+          spinner.setAdapter(adapter);
+  
+          //--注册事件
+          spinner.setOnItemSelectedListener(this);
+      }
+  
+      //--选中spinner下拉列表的响应事件，参数(spinner组件，下拉textview,选中项所处列表中位置，id)
+      @Override
+      public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+          System.out.println(parent.getClass());
+          System.out.println(view.getClass());
+          System.out.println("pos"+position); //从0开始
+          System.out.println("id"+id);        //从0开始
+          //--spinner.getSelectedItem().toString()下拉列表所选中的值
+          Toast.makeText(this,spinner.getSelectedItem().toString(),Toast.LENGTH_LONG).show();
+      }
+  
+      //--未选中事件处理
+      @Override
+      public void onNothingSelected(AdapterView<?> parent) {
+  
       }
   }
 
